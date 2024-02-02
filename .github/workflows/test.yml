@@ -1,0 +1,22 @@
+name: Django CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+      - name: dependencies
+        run: sudo apt-get install libgraphviz-dev
+      - name: Install the project dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run pytest -v
