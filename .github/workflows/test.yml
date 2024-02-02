@@ -12,11 +12,5 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Install poetry
-        uses: abatilo/actions-poetry@v2
       - name: dependencies
-        run: sudo apt-get install libgraphviz-dev
-      - name: Install the project dependencies
-        run: poetry install
-      - name: Run tests
-        run: poetry run pytest -v
+        run: pip install -r requirements.txt
