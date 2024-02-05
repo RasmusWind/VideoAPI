@@ -1,11 +1,16 @@
 from rest_framework.serializers import ModelSerializer, FileField
 from django.contrib.auth.models import User
 from base.models import Video, Profile, Category
-from .related_serializers import UserVideoSerializer, VideoCategoriesSerializer, CategoryVideosSerializer
+from .related_serializers import (
+    UserVideoSerializer,
+    VideoCategoriesSerializer,
+    CategoryVideosSerializer,
+)
 
 
 class CategorySerializer(ModelSerializer):
     videos = CategoryVideosSerializer(many=True)
+
     class Meta:
         model = Category
         fields = ("id", "name", "videos")
@@ -18,8 +23,8 @@ class ProfileSerializer(ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
-    videos = UserVideoSerializer(many=True)
-    profile = ProfileSerializer()
+    videos = UserVideoSerializer(many=True, required=False)
+    profile = ProfileSerializer(required=False)
 
     class Meta:
         model = User

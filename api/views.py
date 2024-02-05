@@ -85,7 +85,6 @@ def rest_login(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def rest_test_token(request):
-    print(request.user.profile)
     return Response(f"Success for user: {request.user.username}")
 
 
