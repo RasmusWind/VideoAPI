@@ -46,5 +46,7 @@ def findNextRandomVid(oldPath):
             rel_file = os.path.join(rel_dir, file_name)
             if oldPath != rel_file:
                 file_set.append(rel_file)
+    if len(file_set) == 0:
+        return None
     random_num = random.randrange(0, len(file_set))
     return file_set[random_num]

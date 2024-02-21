@@ -11,6 +11,7 @@ file_extension_validator = FileExtensionValidator(video_extensions)
 
 def validate_file_mimetype(file):
     accept = [f"video/{ext}" for ext in video_extensions]
+    accept.append("application/octet-stream")
     file_mime_type = magic.from_buffer(file.read(1024), mime=True)
     if file_mime_type not in accept:
         raise ValidationError(f"Unsupported file type: {file_mime_type}")
@@ -42,7 +43,8 @@ class Video(models.Model):
     name = models.CharField(max_length=255)
     file = models.FileField(
         upload_to="video_uploads/%Y/%m/%d/",
-        null=False,
+        null=True,
+        blank=True,
         validators=[file_extension_validator, validate_file_mimetype],
     )
     upload_date = models.DateTimeField(auto_now_add=True)
@@ -51,6 +53,7 @@ class Video(models.Model):
         User,
         related_name="videos",
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
     )
     categories = models.ManyToManyField("base.Category", through="base.VideoCategory")
@@ -86,3 +89,20 @@ class VideoCategory(models.Model):
     category = models.ForeignKey(
         "base.Category", related_name="category_videos", on_delete=models.CASCADE
     )
+
+    class Meta:
+        verbose_name_plural = "Video Categories"
+
+
+class VideoComment(models.Model):
+    video = models.ForeignKey("base.Video", related_name="comments", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="comments", on_delete=models.CASCADE)
+    linked_comment = models.ForeignKey("base.VideoComment", related_name="comments", null=True, blank=True, on_delete=models.SET_NULL)
+
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+
+    text = models.TextField(null=False, blank=False)
+
+    def __str__(self):
+        return f"Comment by: {self.user} on: {self.linked_comment if self.linked_comment else self.video}"

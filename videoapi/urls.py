@@ -14,4 +14,5 @@ urlpatterns = [
         r"^static/(?P<path>.*)$", serve, kwargs={"document_root": settings.STATIC_ROOT}
     ),
     path("", include("api.urls")),
+    re_path(r'^_nested_admin/', include('nested_admin.urls')),
 ]

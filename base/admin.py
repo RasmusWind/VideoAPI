@@ -1,6 +1,18 @@
 from django.contrib import admin
-from .models import Video, Category, Profile
+from .models import Video, Category, Profile, VideoComment
+from nested_admin import NestedModelAdmin, NestedTabularInline
 # Register your models here.
+
+
+class LinkedCommentInline(NestedTabularInline):
+    model = VideoComment
+    extra = 0
+
+
+class CommentInlineAdmin(NestedTabularInline):
+    model = VideoComment
+    inline = (LinkedCommentInline,)
+    extra = 0
 
 
 class CategoryInlineAdmin(admin.TabularInline):
@@ -16,14 +28,15 @@ class VideoInlineAdmin(admin.TabularInline):
 
 
 @admin.register(Video)
-class VideoAdmin(admin.ModelAdmin):
+class VideoAdmin(NestedModelAdmin):
     model = Video
+    list_display = ("id", "name", "file")
     search_fields = ("name", "file")
     readonly_fields = (
         "link",
         "upload_date",
     )
-    inlines = (CategoryInlineAdmin,)
+    inlines = (CommentInlineAdmin,)
 
 
 @admin.register(Category)

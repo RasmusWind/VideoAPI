@@ -10,7 +10,7 @@ from rest_framework.decorators import (
 )
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .base_serializers import UserSerializer, VideoSerializer, CategorySerializer
+from .base_serializers import UserSerializer, VideoSerializer, CategorySerializer, CreateCommentSerializer, CommentSerializer
 from django.contrib.auth.models import User
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
@@ -18,8 +18,7 @@ from wsgiref.util import FileWrapper
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from .utils import findNextRandomVid, RangeFileWrapper, range_re
-from base.models import Video, Category
-
+from base.models import Video, Category, VideoComment
 
 header_param = openapi.Parameter(
     "Authorization",
@@ -32,7 +31,6 @@ login_param = {
     "username": openapi.Schema(type=openapi.TYPE_STRING, description="Username "),
     "password": openapi.Schema(type=openapi.TYPE_STRING, description="Password "),
 }
-
 
 @swagger_auto_schema(
     method="post",
@@ -74,6 +72,7 @@ def rest_signup(request):
 def rest_login(request):
     user = get_object_or_404(User, username=request.data.get("username"))
     if not user.check_password(request.data.get("password")):
+        print("PASSWORD WRONG")
         return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
     serializer = UserSerializer(instance=user)
     token, _ = Token.objects.get_or_create(user=user)
@@ -105,14 +104,37 @@ def set_new_video(request):
     currentVidPath = request.user.profile.last_viewed
     path = "media/video_uploads"
     if not currentVidPath:
-        newVidPath = "2024/01/24/video.mp4"
+        newVidPath = "video.mp4"
     else:
         newVidPath = findNextRandomVid(currentVidPath)
+
+    if not newVidPath:
+        newVidPath = "video.mp4"
+
     path = f"{path}/{newVidPath}"
-    print(path)
     request.user.profile.last_viewed = newVidPath
     request.user.profile.save()
-    return Response({"status": "success"})
+    return Response({"status": "success", "video": newVidPath})
+
+
+@swagger_auto_schema(
+    method="get",
+    manual_parameters=[header_param],
+)
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_new_video(request):
+    user = request.user
+    current_video_id = user.profile.last_viewed
+    if not current_video_id.isnumeric():
+        new_video = Video.objects.order_by("?").first()
+    else:
+        new_video = Video.objects.exclude(pk=current_video_id).order_by("?").first()
+    user.profile.last_viewed = new_video.pk
+    user.profile.save()
+    serializer = VideoSerializer(new_video)
+    return Response({"video":serializer.data})
 
 
 @swagger_auto_schema(method="get", manual_parameters=[header_param])
@@ -120,11 +142,15 @@ def set_new_video(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def videoplayer(request):
-    video_path = request.user.profile.last_viewed
-    if not video_path:
-        video_path = "2024/01/24/video.mp4"
-    path = f"media/video_uploads/{video_path}"
-
+    video_pk = request.user.profile.last_viewed
+    print(video_pk)
+    video = Video.objects.filter(pk=video_pk).first()
+    if not video:
+        video = Video.objects.order_by("?").first()
+    video_path = video.file
+    path = f"media/{video_path}"
+    if not os.path.exists(path):
+        return Response(status=404)
     chunk_size = 2 * 1024 * 1024  # 2 MB
 
     range_header = request.META.get("HTTP_RANGE", "").strip()
@@ -182,3 +208,37 @@ def get_category(request, pk):
     category = get_object_or_404(Category, pk=pk)
     serializer = CategorySerializer(instance=category)
     return Response({"video": serializer.data})
+
+
+@swagger_auto_schema(
+    method="post",
+    manual_parameters=[header_param],
+)
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def create_comment(request):
+    # data = {
+    #     **request.data,
+    #     "user":request.user.pk,
+    # }
+    comment = CreateCommentSerializer(data=request.data)
+    if comment.is_valid():
+        comment.save()
+        comment = CommentSerializer(instance=comment.instance)
+        return Response({"comment": comment.data})
+    return Response(comment.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@swagger_auto_schema(
+    method="get",
+    manual_parameters=[header_param],
+)
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_videocomments(request, pk):
+    comments = VideoComment.objects.filter(video_id=pk, linked_comment=None).order_by("-pk")
+    serializer = CommentSerializer(comments, many=True)
+    return Response({"comments": serializer.data})
+    

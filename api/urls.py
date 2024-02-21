@@ -37,12 +37,15 @@ urlpatterns = [
     path("test_token", views.rest_test_token),
     path("streamvideo", views.videoplayer),
     path("get_user", views.rest_get_user),
+    path("get_new_video", views.get_new_video),
     path("get_video/<int:pk>", views.get_video),
     path("get_category/<int:pk>", views.get_category),
+    path("get_videocomments/<int:pk>", views.get_videocomments),
     # POST REQUEST PATHS:
     path("api-token-auth", authtoken_views.obtain_auth_token),
     path("login", views.rest_login),
     path("signup", views.rest_signup),
     path("uploadvideo", views.upload_video),
     path("setnewvideo", views.set_new_video),
+    path("createcomment", views.create_comment),
 ]
