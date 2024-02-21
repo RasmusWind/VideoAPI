@@ -1,5 +1,5 @@
 env/
-secret_key.txt
 media
 local_settings.py
 __pycache__
+.vscode
