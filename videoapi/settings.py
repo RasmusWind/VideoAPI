@@ -94,7 +94,17 @@ WSGI_APPLICATION = "videoapi.wsgi.application"
 #     }
 # }
 
-DATABASES = {}
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",  # Add 'postgresql_psycopg2', 'po>
+        "NAME": "videoapi",  # Or path to database file if using sqlite3.
+        "USER": "root",  # Not used with sqlite3.
+        "PASSWORD": "123AsD4AsD5",  # Not used with sqlite3.
+        "HOST": "localhost",  # Set to empty string for localhost. Not used wit>
+        "PORT": "",  # Set to empty string for default. Not used with sqlite3.
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
