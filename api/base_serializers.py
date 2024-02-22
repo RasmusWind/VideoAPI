@@ -1,6 +1,8 @@
 from rest_framework.serializers import ModelSerializer, FileField, EmailField
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from base.models import Video, Profile, Category, VideoComment
 from .related_serializers import (
     UserVideoSerializer,
@@ -27,6 +29,12 @@ class UserSerializer(ModelSerializer):
     videos = UserVideoSerializer(many=True, required=False)
     profile = ProfileSerializer(required=False)
     email = EmailField(required=False)
+    
+    def check_user(self, clean_data):
+        user = authenticate(username=clean_data['username'], password=clean_data['password'])
+        if not user:
+            raise ValidationError('user not found')
+        return user
 
     class Meta:
         model = User
@@ -81,11 +89,13 @@ class CommentSerializer(ModelSerializer):
         model = VideoComment
         fields = ("id", "video", "user", "comments", "created_date", "updated_date", "text")
 
-# CommentSerializer.comments = CommentSerializer(many=True)
 
-# class LinkedCommentSerializer(ModelSerializer):
-#     linked_comments = CommentSerializer(many=True)
-
-#     class Meta:
-#         model = VideoComment
-#         fields = ("user", "linked_comments", "created_date", "updated_date", "text")
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+    ##
+    def check_user(self, clean_data):
+        user = authenticate(username=clean_data['username'], password=clean_data['password'])
+        if not user:
+            raise ValidationError('user not found')
+        return user

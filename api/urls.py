@@ -47,5 +47,9 @@ urlpatterns = [
     path("signup", views.rest_signup),
     path("uploadvideo", views.upload_video),
     path("setnewvideo", views.set_new_video),
-    path("createcomment", views.create_comment),
+    path("createcomment", views.CommentPoster.as_view()),
+
+    path('session_login', views.UserLogin.as_view(), name='login'),
+	path('session_logout', views.UserLogout.as_view(), name='logout'),
+	path('session_user', views.UserView.as_view(), name='user'),
 ]
