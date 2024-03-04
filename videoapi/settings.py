@@ -102,23 +102,23 @@ WSGI_APPLICATION = "videoapi.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",  # Add 'postgresql_psycopg2', 'po>
-        "NAME": "videoapi",  # Or path to database file if using sqlite3.
-        "USER": "root",  # Not used with sqlite3.
-        "PASSWORD": "123AsD4AsD5",  # Not used with sqlite3.
-        "HOST": "localhost",  # Set to empty string for localhost. Not used wit>
-        "PORT": "",  # Set to empty string for default. Not used with sqlite3.
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",  # Add 'postgresql_psycopg2', 'po>
+#         "NAME": "videoapi",  # Or path to database file if using sqlite3.
+#         "USER": "root",  # Not used with sqlite3.
+#         "PASSWORD": "123AsD4AsD5",  # Not used with sqlite3.
+#         "HOST": "localhost",  # Set to empty string for localhost. Not used wit>
+#         "PORT": "",  # Set to empty string for default. Not used with sqlite3.
+#     }
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
@@ -177,7 +177,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # REST_FRAMEWORK = {"DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema"}
 
 
-try:
-    from local_settings import *
-except ImportError as e:
-    pass
+# try:
+#     from local_settings import *
+# except ImportError as e:
+#     pass
